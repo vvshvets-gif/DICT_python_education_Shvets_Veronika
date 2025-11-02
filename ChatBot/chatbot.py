@@ -29,3 +29,35 @@ for number in range(number_input):
     print(f" {number} !")
 
 print('Completed, have a nice day!')
+
+print("Let's test your programming knowledge.")
+
+questions = [
+    ('Why do we use methods?',
+     [
+        ('To repeat a statement multiple times.', False),
+        ('To decompose a program into several small subroutines.', True),
+        ('To determine the execution time of a program.', False),
+        ('To interrupt the execution of a program.', False)
+     ]
+    )
+]
+
+for question, answers in questions:
+    print(f"Question: {question}")
+    for index, (answer, condition) in enumerate(answers):
+        print(f"{index + 1}. {answer}")
+
+while True:
+    print(f"Please enter your answer.")
+    answer_input = int(input())
+    (question, answers) = questions[0]
+    (answer, condition) = answers[answer_input - 1]
+
+    if condition:
+        print("Completed, have a nice day!")
+        break
+    else:
+        print("Please, try again.")
+
+print("Congratulations, have a nice day!")
