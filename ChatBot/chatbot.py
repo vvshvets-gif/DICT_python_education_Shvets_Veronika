@@ -64,3 +64,13 @@ print("Congratulations, have a nice day!")
 print('Hello! My name is DICT_Bot')
 print('I was created in 2025')
 print('Please, remind me your name.')
+
+
+print('Now I will prove to you that I can count to any number you want.')
+
+number_input = int(input()) + 1
+
+for number in range(number_input):
+    print(f" {number} !")
+
+print('Completed, have a nice day!')
