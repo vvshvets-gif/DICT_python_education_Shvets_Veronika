@@ -1,21 +1,4 @@
-FORMATTERS = (
-    "plain",
-    "bold",
-    "italic",
-    "header",
-    "link",
-    "inline-code",
-    "ordered-list",
-    "unordered-list",
-    "new-line"
-)
-
 markdown = ""
-
-
-def show_help():
-    print("Available formatters:", *FORMATTERS)
-    print("Special commands: !help !done")
 
 
 def done():
@@ -61,7 +44,12 @@ def header():
 
 
 def ordered_list():
-    rows = int(input("Number of rows: "))
+    while True:
+        rows = int(input("Number of rows: "))
+        if rows > 0:
+            break
+        print("The number of rows should be greater than zero")
+
     result = ""
     for i in range(1, rows + 1):
         result += f"{i}. {input(f'Row #{i}: ')}\n"
@@ -69,10 +57,15 @@ def ordered_list():
 
 
 def unordered_list():
-    rows = int(input("Number of rows: "))
+    while True:
+        rows = int(input("Number of rows: "))
+        if rows > 0:
+            break
+        print("The number of rows should be greater than zero")
+
     result = ""
-    for i in range(rows):
-        result += f"* {input(f'Row #{i + 1}: ')}\n"
+    for i in range(1, rows + 1):
+        result += f"* {input(f'Row #{i}: ')}\n"
     return result
 
 
@@ -87,6 +80,12 @@ FORMATTER_ACTIONS = {
     "ordered-list": ordered_list,
     "unordered-list": unordered_list,
 }
+
+
+def show_help():
+    print("Available formatters:", *FORMATTER_ACTIONS.keys())
+    print("Special commands: !help !done")
+
 
 COMMANDS = {
     "!help": show_help,
