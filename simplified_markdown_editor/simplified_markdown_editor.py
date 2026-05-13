@@ -3,6 +3,8 @@ markdown = ""
 
 def done():
     global running
+    with open("output.md", "w", encoding="utf-8") as f:
+        f.write(markdown)
     running = False
 
 
