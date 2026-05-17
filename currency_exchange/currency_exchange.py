@@ -1,12 +1,9 @@
-RATES = {
-    "ARS": 0.82,
-    "HNL": 0.17,
-    "AUD": 1.9622,
-    "MAD": 0.208,
-}
+import requests
 
-mycoins = float(input("> "))
+currency = input("Enter the currency code: ").lower()
 
-for currency, rate in RATES.items():
-    amount = round(mycoins * rate, 2)
-    print(f"I will get {amount} {currency} from the sale of {mycoins} mycoins.")
+response = requests.get(f"http://www.floatrates.com/daily/{currency}.json")
+data = response.json()
+
+print(data["usd"])
+print(data["eur"])
