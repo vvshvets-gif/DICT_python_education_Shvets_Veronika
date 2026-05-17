@@ -1,11 +1,6 @@
 import random
 
-win_map = {
-    "rock": "scissors",
-    "scissors": "paper",
-    "paper": "rock"
-}
-
+DEFAULT_OPTIONS = ["rock", "paper", "scissors"]
 SCORES = {"win": 100, "draw": 50, "lose": 0}
 
 
@@ -21,10 +16,40 @@ def load_rating(name):
     return 0
 
 
+def build_win_map(options):
+    """
+    For each option, determine which options it beats.
+    The 'rotated' list (items after + items before) has:
+      - first half: options that beat the current one
+      - second half: options beaten by the current one
+    """
+    win_map = {}
+    n = len(options)
+    half = n // 2
+    for i, option in enumerate(options):
+        rotated = options[i + 1:] + options[:i]
+        win_map[option] = set(rotated[half:])
+    return win_map
+
+
+def get_outcome(user, computer, win_map):
+    if user == computer:
+        return "draw"
+    if computer in win_map[user]:
+        return "win"
+    return "lose"
+
+
 name = input("Enter your name: ")
 print(f"Hello, {name}")
 
 score = load_rating(name)
+
+raw = input("> ")
+options = [o.strip() for o in raw.split(",")] if raw.strip() else DEFAULT_OPTIONS
+win_map = build_win_map(options)
+
+print("Okay, let's start")
 
 while True:
     user = input("> ")
@@ -41,14 +66,14 @@ while True:
         print("Invalid input")
         continue
 
-    computer = random.choice(list(win_map.keys()))
+    computer = random.choice(options)
+    outcome = get_outcome(user, computer, win_map)
 
-    if user == computer:
+    if outcome == "draw":
         print(f"There is a draw ({computer})")
-        score += SCORES["draw"]
-    elif win_map[user] == computer:
+    elif outcome == "lose":
         print(f"Sorry, but the computer chose {computer}")
-        score += SCORES["lose"]
     else:
         print(f"Well done. The computer chose {computer} and failed")
-        score += SCORES["win"]
+
+    score += SCORES[outcome]
