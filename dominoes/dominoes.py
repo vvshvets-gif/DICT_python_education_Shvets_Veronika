@@ -72,6 +72,26 @@ def is_valid_move(move, pieces, snake):
         return snake[0][0] in piece
 
 
+def computer_move(computer, snake):
+    counts = [0] * 7
+    for piece in computer + snake:
+        for n in piece:
+            counts[n] += 1
+
+    scored = sorted(range(len(computer)),
+                    key=lambda i: counts[computer[i][0]] + counts[computer[i][1]],
+                    reverse=True)
+
+    for i in scored:
+        move = i + 1
+        if is_valid_move(move, computer, snake):
+            return move
+        if is_valid_move(-move, computer, snake):
+            return -move
+
+    return 0
+
+
 def apply_move(move, pieces, snake, stock):
     if move == 0:
         if stock:
@@ -119,10 +139,7 @@ while True:
         apply_move(move, player, snake, stock)
     else:
         input("> ")
-        while True:
-            move = random.randint(-len(computer), len(computer))
-            if is_valid_move(move, computer, snake):
-                break
+        move = computer_move(computer, snake)
         apply_move(move, computer, snake, stock)
 
     status = NEXT_TURN[status]
