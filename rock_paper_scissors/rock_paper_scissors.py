@@ -1,17 +1,27 @@
 import random
 
-choices = ["rock", "paper", "scissors"]
+win_map = {
+    "rock": "scissors",
+    "scissors": "paper",
+    "paper": "rock"
+}
 
-user = input("> ")
-computer = random.choice(choices)
+while True:
+    user = input("> ")
 
-if user == computer:
-    print(f"There is a draw ({computer})")
-elif (
-    (user == "rock" and computer == "scissors") or
-    (user == "scissors" and computer == "paper") or
-    (user == "paper" and computer == "rock")
-):
-    print(f"Well done. The computer chose {computer} and failed")
-else:
-    print(f"Sorry, but the computer chose {computer}")
+    if user == "!exit":
+        print("Bye!")
+        break
+
+    if user not in win_map:
+        print("Invalid input")
+        continue
+
+    computer = random.choice(list(win_map.keys()))
+
+    if user == computer:
+        print(f"There is a draw ({computer})")
+    elif win_map[user] == computer:
+        print(f"Sorry, but the computer chose {computer}")
+    else:
+        print(f"Well done. The computer chose {computer} and failed")
