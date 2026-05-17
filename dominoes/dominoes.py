@@ -62,6 +62,16 @@ def check_end(player, computer, snake):
     return None
 
 
+def is_valid_move(move, pieces, snake):
+    if move == 0:
+        return True
+    piece = pieces[abs(move) - 1]
+    if move > 0:
+        return snake[-1][1] in piece
+    else:
+        return snake[0][0] in piece
+
+
 def apply_move(move, pieces, snake, stock):
     if move == 0:
         if stock:
@@ -69,8 +79,12 @@ def apply_move(move, pieces, snake, stock):
         return
     piece = pieces.pop(abs(move) - 1)
     if move > 0:
+        if piece[0] != snake[-1][1]:
+            piece = piece[::-1]
         snake.append(piece)
     else:
+        if piece[1] != snake[0][0]:
+            piece = piece[::-1]
         snake.insert(0, piece)
 
 
@@ -96,13 +110,19 @@ while True:
                 move = int(input("> "))
                 if abs(move) > len(player):
                     raise ValueError
+                if not is_valid_move(move, player, snake):
+                    print("Illegal move. Please try again.")
+                    continue
                 break
             except ValueError:
                 print("Invalid input. Please try again.")
         apply_move(move, player, snake, stock)
     else:
         input("> ")
-        move = random.randint(-len(computer), len(computer))
+        while True:
+            move = random.randint(-len(computer), len(computer))
+            if is_valid_move(move, computer, snake):
+                break
         apply_move(move, computer, snake, stock)
 
     status = NEXT_TURN[status]
