@@ -14,10 +14,20 @@ ACCOUNT_MENU = """
 0. Exit"""
 
 
+def luhn_check_digit(first_15):
+    digits = [int(d) for d in first_15]
+    for i in range(0, len(digits), 2):
+        digits[i] *= 2
+        if digits[i] > 9:
+            digits[i] -= 9
+    return (10 - sum(digits) % 10) % 10
+
+
 def generate_card():
     while True:
         account_number = str(random.randint(0, 999999999)).zfill(9)
-        card = IIN + account_number + "0"  # placeholder check digit
+        first_15 = IIN + account_number
+        card = first_15 + str(luhn_check_digit(first_15))
         if card not in accounts:
             return card
 
