@@ -1,21 +1,41 @@
 import random
 
-a = random.randint(2, 9)
-b = random.randint(2, 9)
+score = 0
+
+def add(a, b):
+    return a + b
+
+def sub(a, b):
+    return a - b
+
+def mul(a, b):
+    return a * b
 
 operations = {
-    '+': a + b,
-    '-': a - b,
-    '*': a * b
+    '+': add,
+    '-': sub,
+    '*': mul
 }
 
-op = random.choice(list(operations.keys()))
+for _ in range(5):
+    a = random.randint(2, 9)
+    b = random.randint(2, 9)
 
-print(f"{a} {op} {b}")
+    op = random.choice(list(operations.keys()))
 
-answer = int(input())
+    print(f"{a} {op} {b}")
 
-if answer == operations[op]:
-    print("Right!")
-else:
-    print("Wrong!")
+    while True:
+        try:
+            answer = int(input())
+            break
+        except ValueError:
+            print("Incorrect format.")
+
+    if answer == operations[op]:
+        print("Right!")
+        score += 1
+    else:
+        print("Wrong!")
+
+print(f"Your mark is {score}/5.")
