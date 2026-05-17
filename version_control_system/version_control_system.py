@@ -118,11 +118,30 @@ def cmd_log(args):
     print(log)
 
 
+def cmd_checkout(args):
+    if not args:
+        print("Commit id was not passed.")
+        return
+
+    commit_id = args[0]
+    commit_dir = os.path.join(COMMITS_DIR, commit_id)
+
+    if not os.path.exists(commit_dir):
+        print("Commit does not exist.")
+        return
+
+    for filename in os.listdir(commit_dir):
+        shutil.copy2(os.path.join(commit_dir, filename), filename)
+
+    print(f"Switched to commit {commit_id}.")
+
+
 HANDLERS = {
     "config":   cmd_config,
     "add":      cmd_add,
     "commit":   cmd_commit,
     "log":      cmd_log,
+    "checkout": cmd_checkout,
 }
 
 arg = sys.argv[1] if len(sys.argv) > 1 else "--help"
