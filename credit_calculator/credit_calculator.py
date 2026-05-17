@@ -1,20 +1,48 @@
 import math
 
-principal = int(input("Enter the loan principal:\n> "))
+MENU = (
+    'What do you want to calculate?\n'
+    'type "n" for number of monthly payments,\n'
+    'type "a" for annuity monthly payment amount,\n'
+    'type "p" for loan principal:'
+)
 
-print('What do you want to calculate?\ntype "m" – for number of monthly payments,\ntype "p" – for the monthly payment:')
-choice = input("> ")
 
-if choice == "m":
-    payment = int(input("Enter the monthly payment:\n> "))
-    months = math.ceil(principal / payment)
-    print(f"It will take {months} month{'s' if months > 1 else ''} to repay the loan")
+def months_to_str(n):
+    years, months = divmod(n, 12)
+    parts = []
+    if years:
+        parts.append(f"{years} year{'s' if years > 1 else ''}")
+    if months:
+        parts.append(f"{months} month{'s' if months > 1 else ''}")
+    return " and ".join(parts)
+
+
+choice = input(f"{MENU}\n> ")
+
+if choice == "n":
+    principal = float(input("Enter the loan principal:\n> "))
+    payment = float(input("Enter the monthly payment:\n> "))
+    interest = float(input("Enter the loan interest:\n> "))
+
+    i = interest / (12 * 100)
+    n = math.ceil(math.log(payment / (payment - i * principal), 1 + i))
+    print(f"It will take {months_to_str(n)} to repay this loan!")
+
+elif choice == "a":
+    principal = float(input("Enter the loan principal:\n> "))
+    n = int(input("Enter the number of periods:\n> "))
+    interest = float(input("Enter the loan interest:\n> "))
+
+    i = interest / (12 * 100)
+    payment = math.ceil(principal * (i * (1 + i) ** n) / ((1 + i) ** n - 1))
+    print(f"Your monthly payment = {payment}!")
 
 elif choice == "p":
-    months = int(input("Enter the number of months:\n> "))
-    payment = math.ceil(principal / months)
-    last_payment = principal - (months - 1) * payment
-    if last_payment == payment:
-        print(f"Your monthly payment = {payment}")
-    else:
-        print(f"Your monthly payment = {payment} and the last payment = {last_payment}.")
+    payment = float(input("Enter the annuity payment:\n> "))
+    n = int(input("Enter the number of periods:\n> "))
+    interest = float(input("Enter the loan interest:\n> "))
+
+    i = interest / (12 * 100)
+    principal = round(payment / ((i * (1 + i) ** n) / ((1 + i) ** n - 1)))
+    print(f"Your loan principal = {principal}!")
