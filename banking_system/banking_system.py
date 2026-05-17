@@ -12,7 +12,10 @@ MAIN_MENU = """
 
 ACCOUNT_MENU = """
 1. Balance
-2. Log out
+2. Add income
+3. Do transfer
+4. Close account
+5. Log out
 0. Exit"""
 
 
@@ -71,6 +74,50 @@ def login(conn):
     account_session(conn, card)
 
 
+def is_luhn_valid(card_number):
+    digits = [int(d) for d in card_number]
+    check = digits.pop()
+    for i in range(0, len(digits), 2):
+        digits[i] *= 2
+        if digits[i] > 9:
+            digits[i] -= 9
+    return (sum(digits) + check) % 10 == 0
+
+
+def add_income(conn, card):
+    amount = int(input("\nEnter income:\n>"))
+    conn.execute("UPDATE card SET balance = balance + ? WHERE number = ?", (amount, card))
+    conn.commit()
+    print("Income was added!")
+
+
+def do_transfer(conn, card):
+    print("\nTransfer")
+    target = input("Enter card number:\n>")
+
+    if target == card:
+        print("You can't transfer money to the same account!")
+        return
+    if not is_luhn_valid(target):
+        print("Probably you made a mistake in the card number. Please try again!")
+        return
+    if not conn.execute("SELECT 1 FROM card WHERE number = ?", (target,)).fetchone():
+        print("Such a card does not exist.")
+        return
+
+    amount = int(input("Enter how much money you want to transfer:\n>"))
+    balance = conn.execute("SELECT balance FROM card WHERE number = ?", (card,)).fetchone()[0]
+
+    if amount > balance:
+        print("Not enough money!")
+        return
+
+    conn.execute("UPDATE card SET balance = balance - ? WHERE number = ?", (amount, card))
+    conn.execute("UPDATE card SET balance = balance + ? WHERE number = ?", (amount, target))
+    conn.commit()
+    print("Success!")
+
+
 def account_session(conn, card):
     while True:
         print(ACCOUNT_MENU)
@@ -80,6 +127,15 @@ def account_session(conn, card):
             row = conn.execute("SELECT balance FROM card WHERE number = ?", (card,)).fetchone()
             print(f"\nBalance: {row[0]}")
         elif choice == "2":
+            add_income(conn, card)
+        elif choice == "3":
+            do_transfer(conn, card)
+        elif choice == "4":
+            conn.execute("DELETE FROM card WHERE number = ?", (card,))
+            conn.commit()
+            print("\nThe account has been closed!")
+            return
+        elif choice == "5":
             print("\nYou have successfully logged out!")
             return
         elif choice == "0":
