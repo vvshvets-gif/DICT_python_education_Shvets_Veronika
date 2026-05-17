@@ -1,9 +1,13 @@
 import sys
 import os
+import hashlib
+import shutil
 
 VCS_DIR = "vcs"
 CONFIG_FILE = os.path.join(VCS_DIR, "config.txt")
 INDEX_FILE = os.path.join(VCS_DIR, "index.txt")
+LOG_FILE = os.path.join(VCS_DIR, "log.txt")
+COMMITS_DIR = os.path.join(VCS_DIR, "commits")
 
 COMMANDS = {
     "config":   "Get and set a username.",
@@ -18,12 +22,37 @@ HELP = "These are VCS commands:\n" + "\n".join(
 )
 
 os.makedirs(VCS_DIR, exist_ok=True)
+os.makedirs(COMMITS_DIR, exist_ok=True)
+
+
+def read_file(path, default=""):
+    return open(path).read() if os.path.exists(path) else default
+
+
+def tracked_files():
+    return read_file(INDEX_FILE).splitlines()
+
+
+def files_hash():
+    h = hashlib.sha256()
+    for filename in tracked_files():
+        if os.path.exists(filename):
+            h.update(open(filename, "rb").read())
+    return h.hexdigest()
+
+
+def last_commit_hash():
+    log = read_file(LOG_FILE)
+    if not log:
+        return None
+    first_line = log.splitlines()[0]
+    return first_line.split()[1] if first_line.startswith("commit ") else None
 
 
 def cmd_config(args):
     if not args:
         if os.path.exists(CONFIG_FILE):
-            print(f"The username is {open(CONFIG_FILE).read().strip()}.")
+            print(f"The username is {read_file(CONFIG_FILE).strip()}.")
         else:
             print("Please, tell me who you are.")
     else:
@@ -34,28 +63,66 @@ def cmd_config(args):
 
 def cmd_add(args):
     if not args:
-        if os.path.exists(INDEX_FILE):
-            files = open(INDEX_FILE).read().strip()
-            if files:
-                print("Tracked files:")
-                print(files)
-                return
-        print("Add a file to the index.")
+        files = read_file(INDEX_FILE).strip()
+        if files:
+            print("Tracked files:")
+            print(files)
+        else:
+            print("Add a file to the index.")
     else:
         filename = args[0]
         if not os.path.exists(filename):
             print(f"Can't find '{filename}'.")
             return
-        tracked = open(INDEX_FILE).read().splitlines() if os.path.exists(INDEX_FILE) else []
+        tracked = read_file(INDEX_FILE).splitlines()
         if filename not in tracked:
             with open(INDEX_FILE, "a") as f:
                 f.write(filename + "\n")
         print(f"The file '{filename}' is tracked.")
 
 
+def cmd_commit(args):
+    if not args:
+        print("Message was not passed.")
+        return
+
+    message = args[0]
+    commit_id = files_hash()
+    last_id = last_commit_hash()
+
+    if commit_id == last_id:
+        print("Nothing to commit.")
+        return
+
+    author = read_file(CONFIG_FILE).strip()
+    commit_dir = os.path.join(COMMITS_DIR, commit_id)
+    os.makedirs(commit_dir)
+
+    for filename in tracked_files():
+        if os.path.exists(filename):
+            shutil.copy2(filename, commit_dir)
+
+    entry = f"commit {commit_id}\nAuthor: {author}\n{message}\n\n"
+    existing = read_file(LOG_FILE)
+    with open(LOG_FILE, "w") as f:
+        f.write(entry + existing)
+
+    print("Changes are committed.")
+
+
+def cmd_log(args):
+    log = read_file(LOG_FILE).strip()
+    if not log:
+        print("No commits yet.")
+        return
+    print(log)
+
+
 HANDLERS = {
-    "config": cmd_config,
-    "add": cmd_add,
+    "config":   cmd_config,
+    "add":      cmd_add,
+    "commit":   cmd_commit,
+    "log":      cmd_log,
 }
 
 arg = sys.argv[1] if len(sys.argv) > 1 else "--help"
